@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: superset.datapipeline.sa-scw.fr
+  namespace: pipeline-namespace
+spec:
+  secretName: superset-datapipeline-scw-tls
+  issuerRef:
+    name: lets-encrypt
+    kind: ClusterIssuer
+  commonName:  superset.datapipeline.sa-scw.fr
+  dnsNames:
+    - superset.datapipeline.sa-scw.fr

@@ -1,0 +1,55 @@
+apiVersion: v1
+data:
+  merge_data.py: "import sys\nimport os\nfrom datetime import datetime\nfrom calendar import monthrange\nfrom pyspark import SparkConf, SparkContext\nfrom pyspark.sql import SparkSession\nfrom pyspark.sql import functions as F\n\nspark = SparkSession.builder.appName(\"merge_data\").getOrCreate()\n\nexecution_date = datetime.strptime(os.environ.get(\"AIRFLOW_CTX_EXECUTION_DATE\").split('T')[0], '%Y-%m-%d')\n\ndf = spark.read \\\n    .option(\"header\", \"true\") \\\n    .option(\"inferSchema\", \"true\") \\\n    .csv(f\"/usr/share/covid_data/raw/{execution_date.strftime('%Y')}/{execution_date.strftime('%m')}/{execution_date.strftime('%d')}/ita_cases_{execution_date.strftime('%Y%m%d')}.csv\")\n\n# TO-DO: rename date to something else to free up reserved name, same for id\n# Column renaming\ndf = df.withColumnRenamed(\"data\", \"collection_date\")\ndf = df.withColumnRenamed(\"nuovi_positivi\", \"new_positive_cases\")\ndf = df.withColumnRenamed(\"stato\", \"country_cod\")\n\n# Data types transformation\ndf = df.withColumn(\"date\",F.to_date(F.col(\"collection_date\"))) \n\n# New columns creation\ndf = df.withColumn(\"collection_id\",F.md5(F.concat(F.col(\"collection_date\"),F.col(\"country_cod\"))))\n\n# Select only relevant colums\n\ndf = df.select(\"collection_id\",\"new_positive_cases\",\"collection_date\",\"country_cod\")\n\n# df.write.mode('overwrite').partitionBy(\"country_cod\").parquet(f\"/usr/share/covid_data/pq/{execution_date.strftime('%Y')}/{execution_date.strftime('%m')}/{execution_date.strftime('%d')}/cases_{execution_date.strftime('%Y%m%d')}.parquet\")\n\ndf.write.mode('overwrite').partitionBy(\"country_cod\").parquet(f\"hdfs://namenode:8020/covid_data/pq/{execution_date.strftime('%Y')}/{execution_date.strftime('%m')}/{execution_date.strftime('%d')}/cases_{execution_date.strftime('%Y%m%d')}.parquet\")\n\n\n\n"
+  save_to_warehouse.py: |
+    import sys
+    import os
+    from datetime import datetime
+    from pyspark.sql import SparkSession
+    from pyspark.sql import functions as F
+
+    execution_date = datetime.strptime(os.environ.get("AIRFLOW_CTX_EXECUTION_DATE").split('T')[0], '%Y-%m-%d')
+
+    spark = SparkSession \
+        .builder \
+        .appName("save_to_warehouse") \
+        .config("hive.exec.scratchdir", "hdfs://namenode:8020/opt/hive/scratch_dir") \
+        .config("hive.metastore.uris", "thrift://hive-metastore:9083") \
+        .config("spark.sql.warehouse.dir", "/user/hive/warehouse") \
+        .enableHiveSupport() \
+        .getOrCreate()
+        # TO DO: configure DB covid_data
+
+    df = spark.read \
+        .parquet(f"hdfs://namenode:8020/covid_data/pq/{execution_date.strftime('%Y')}/{execution_date.strftime('%m')}/{execution_date.strftime('%d')}/cases_{execution_date.strftime('%Y%m%d')}.parquet")
+
+    if "cases" in spark.catalog.listTables():
+        print("i'm not here")
+        current_table = spark.read.table("cases")
+        # Renoves matching rows from current table
+        current_table = current_table.join(df, current_table.collection_id == df.collection_id, "leftanti")
+        # Adds them back from the updated source
+        current_table = current_table.union(df)
+        # Save the table in hive
+        current_table.write.mode("overwrite").saveAsTable("cases_temp_table")
+        new_table = spark.read.table("cases_temp_table")
+        # TO-DO: Change the processing logic to avoid rewriting the whole table --> delete and then append
+        new_table.write \
+            .mode("overwrite") \
+            .insertInto("cases")
+        spark.sql("DROP TABLE cases_temp_table")
+    else:
+        #spark.sql("CREATE DATABASE IF NOT EXISTS covid_data")
+        df.write \
+            .partitionBy("collection_date", "country_cod") \
+            .mode("overwrite") \
+            .saveAsTable("cases")
+
+      # docker-compose exec hive-server bash
+      # /opt/hive/bin/beeline -u jdbc:hive2://localhost:10000
+      # hadoop dfs -rm -r hdfs://namenode:8020/user/hive/warehouse/cases
+kind: ConfigMap
+metadata:
+  labels:
+    io.kompose.service: airflow-scheduler
+  name: airflow-scheduler-cm3

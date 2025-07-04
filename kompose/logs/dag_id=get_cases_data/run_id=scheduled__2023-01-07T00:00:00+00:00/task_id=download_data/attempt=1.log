@@ -1,0 +1,56 @@
+[2024-09-26T09:42:31.346+0000] {taskinstance.py:1087} INFO - Dependencies all met for <TaskInstance: get_cases_data.download_data scheduled__2023-01-07T00:00:00+00:00 [queued]>
+[2024-09-26T09:42:31.384+0000] {taskinstance.py:1087} INFO - Dependencies all met for <TaskInstance: get_cases_data.download_data scheduled__2023-01-07T00:00:00+00:00 [queued]>
+[2024-09-26T09:42:31.386+0000] {taskinstance.py:1283} INFO - 
+--------------------------------------------------------------------------------
+[2024-09-26T09:42:31.386+0000] {taskinstance.py:1284} INFO - Starting attempt 1 of 1
+[2024-09-26T09:42:31.386+0000] {taskinstance.py:1285} INFO - 
+--------------------------------------------------------------------------------
+[2024-09-26T09:42:31.439+0000] {taskinstance.py:1304} INFO - Executing <Task(BashOperator): download_data> on 2023-01-07 00:00:00+00:00
+[2024-09-26T09:42:31.462+0000] {standard_task_runner.py:55} INFO - Started process 3884 to run task
+[2024-09-26T09:42:31.469+0000] {standard_task_runner.py:82} INFO - Running: ['***', 'tasks', 'run', 'get_cases_data', 'download_data', 'scheduled__2023-01-07T00:00:00+00:00', '--job-id', '41', '--raw', '--subdir', 'DAGS_FOLDER/get_cases_data.py', '--cfg-path', '/tmp/tmphzzgym3f']
+[2024-09-26T09:42:31.472+0000] {standard_task_runner.py:83} INFO - Job 41: Subtask download_data
+[2024-09-26T09:42:31.668+0000] {task_command.py:389} INFO - Running <TaskInstance: get_cases_data.download_data scheduled__2023-01-07T00:00:00+00:00 [running]> on host 3d66d2a77c1d
+[2024-09-26T09:42:31.814+0000] {logging_mixin.py:137} WARNING - /home/***/.local/lib/python3.7/site-packages/***/utils/context.py:205 AirflowContextDeprecationWarning: Accessing 'execution_date' from the template is deprecated and will be removed in a future version. Please use 'data_interval_start' or 'logical_date' instead.
+[2024-09-26T09:42:32.013+0000] {taskinstance.py:1513} INFO - Exporting the following env vars:
+AIRFLOW_CTX_DAG_OWNER=***
+AIRFLOW_CTX_DAG_ID=get_cases_data
+AIRFLOW_CTX_TASK_ID=download_data
+AIRFLOW_CTX_EXECUTION_DATE=2023-01-07T00:00:00+00:00
+AIRFLOW_CTX_TRY_NUMBER=1
+AIRFLOW_CTX_DAG_RUN_ID=scheduled__2023-01-07T00:00:00+00:00
+[2024-09-26T09:42:32.014+0000] {subprocess.py:63} INFO - Tmp dir root location: 
+ /tmp
+[2024-09-26T09:42:32.015+0000] {subprocess.py:75} INFO - Running command: ['/bin/bash', '-c', 'curl -sSL --create-dirs -o /usr/share/covid_data/raw/2023/01/07/ita_cases_20230107.csv https://raw.githubusercontent.com/pcm-dpc/COVID-19/master/dati-andamento-nazionale/dpc-covid19-ita-andamento-nazionale-20230107.csv']
+[2024-09-26T09:42:32.075+0000] {subprocess.py:86} INFO - Output:
+[2024-09-26T09:42:32.341+0000] {subprocess.py:97} INFO - Command exited with return code 0
+[2024-09-26T09:42:32.488+0000] {taskinstance.py:1327} INFO - Marking task as SUCCESS. dag_id=get_cases_data, task_id=download_data, execution_date=20230107T000000, start_date=20240926T094231, end_date=20240926T094232
+[2024-09-26T09:42:32.622+0000] {local_task_job.py:159} INFO - Task exited with return code 0
+[2024-09-26T09:42:32.753+0000] {taskinstance.py:2582} INFO - 1 downstream tasks scheduled from follow-on schedule check
+[2024-09-30T11:36:18.343+0000] {taskinstance.py:1087} INFO - Dependencies all met for <TaskInstance: get_cases_data.download_data scheduled__2023-01-07T00:00:00+00:00 [queued]>
+[2024-09-30T11:36:18.365+0000] {taskinstance.py:1087} INFO - Dependencies all met for <TaskInstance: get_cases_data.download_data scheduled__2023-01-07T00:00:00+00:00 [queued]>
+[2024-09-30T11:36:18.366+0000] {taskinstance.py:1283} INFO - 
+--------------------------------------------------------------------------------
+[2024-09-30T11:36:18.366+0000] {taskinstance.py:1284} INFO - Starting attempt 1 of 1
+[2024-09-30T11:36:18.366+0000] {taskinstance.py:1285} INFO - 
+--------------------------------------------------------------------------------
+[2024-09-30T11:36:18.399+0000] {taskinstance.py:1304} INFO - Executing <Task(BashOperator): download_data> on 2023-01-07 00:00:00+00:00
+[2024-09-30T11:36:18.415+0000] {standard_task_runner.py:55} INFO - Started process 6672 to run task
+[2024-09-30T11:36:18.423+0000] {standard_task_runner.py:82} INFO - Running: ['***', 'tasks', 'run', 'get_cases_data', 'download_data', 'scheduled__2023-01-07T00:00:00+00:00', '--job-id', '57', '--raw', '--subdir', 'DAGS_FOLDER/get_cases_data.py', '--cfg-path', '/tmp/tmphetzkhht']
+[2024-09-30T11:36:18.425+0000] {standard_task_runner.py:83} INFO - Job 57: Subtask download_data
+[2024-09-30T11:36:18.582+0000] {task_command.py:389} INFO - Running <TaskInstance: get_cases_data.download_data scheduled__2023-01-07T00:00:00+00:00 [running]> on host 774e6edce74f
+[2024-09-30T11:36:18.667+0000] {logging_mixin.py:137} WARNING - /home/***/.local/lib/python3.7/site-packages/***/utils/context.py:205 AirflowContextDeprecationWarning: Accessing 'execution_date' from the template is deprecated and will be removed in a future version. Please use 'data_interval_start' or 'logical_date' instead.
+[2024-09-30T11:36:18.755+0000] {taskinstance.py:1513} INFO - Exporting the following env vars:
+AIRFLOW_CTX_DAG_OWNER=***
+AIRFLOW_CTX_DAG_ID=get_cases_data
+AIRFLOW_CTX_TASK_ID=download_data
+AIRFLOW_CTX_EXECUTION_DATE=2023-01-07T00:00:00+00:00
+AIRFLOW_CTX_TRY_NUMBER=1
+AIRFLOW_CTX_DAG_RUN_ID=scheduled__2023-01-07T00:00:00+00:00
+[2024-09-30T11:36:18.756+0000] {subprocess.py:63} INFO - Tmp dir root location: 
+ /tmp
+[2024-09-30T11:36:18.757+0000] {subprocess.py:75} INFO - Running command: ['/bin/bash', '-c', 'curl -sSL --create-dirs -o /usr/share/covid_data/raw/2023/01/07/ita_cases_20230107.csv https://raw.githubusercontent.com/pcm-dpc/COVID-19/master/dati-andamento-nazionale/dpc-covid19-ita-andamento-nazionale-20230107.csv']
+[2024-09-30T11:36:18.789+0000] {subprocess.py:86} INFO - Output:
+[2024-09-30T11:36:19.114+0000] {subprocess.py:97} INFO - Command exited with return code 0
+[2024-09-30T11:36:19.172+0000] {taskinstance.py:1327} INFO - Marking task as SUCCESS. dag_id=get_cases_data, task_id=download_data, execution_date=20230107T000000, start_date=20240930T113618, end_date=20240930T113619
+[2024-09-30T11:36:19.240+0000] {local_task_job.py:159} INFO - Task exited with return code 0
+[2024-09-30T11:36:19.308+0000] {taskinstance.py:2582} INFO - 1 downstream tasks scheduled from follow-on schedule check

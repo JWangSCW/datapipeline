@@ -1,0 +1,3 @@
+This directory contains Terraform modules :
+* 1 module for a deployment in one VM (all containers in one VM)
+* 1 module for a deployment in Kapsule + Object storage + managedDB ...

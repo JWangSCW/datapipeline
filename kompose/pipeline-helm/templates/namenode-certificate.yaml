@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: namenode.datapipeline.sa-scw.fr
+  namespace: pipeline-namespace
+spec:
+  secretName: namenode-datapipeline-scw-tls
+  issuerRef:
+    name: lets-encrypt
+    kind: ClusterIssuer
+  commonName:  namenode.datapipeline.sa-scw.fr
+  dnsNames:
+    - namenode.datapipeline.sa-scw.fr

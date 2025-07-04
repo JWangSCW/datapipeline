@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: lets-encrypt
+  name: namenode-datapipeline-scw-ingress
+spec:
+  rules:
+    - host:  namenode.datapipeline.sa-scw.fr
+      http:
+        paths:
+        - backend:
+            service:
+              name: namenode
+              port:
+                number: 9870
+          pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - namenode.datapipeline.sa-scw.fr
+      secretName: namenode-datapipeline-scw-tls

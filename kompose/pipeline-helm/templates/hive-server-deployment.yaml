@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -v --volumes persistentVolumeClaim --file docker-compose-compatible-kompose.yml
+    kompose.version: 1.34.0 (cbf2835db)
+  labels:
+    io.kompose.service: hive-server
+  name: hive-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: hive-server
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -v --volumes persistentVolumeClaim --file docker-compose-compatible-kompose.yml
+        kompose.version: 1.34.0 (cbf2835db)
+      labels:
+        io.kompose.service: hive-server
+    spec:
+{{/*      initContainers:*/}}
+{{/*        - name: import-config*/}}
+{{/*          image: alpine*/}}
+{{/*          volumeMounts:*/}}
+{{/*            - name: warehouse*/}}
+{{/*              mountPath: /opt/hive/data/warehouse*/}}
+{{/*            - name: hive-init-server*/}}
+{{/*              mountPath: /tmp/configMap*/}}
+{{/*            - name: hive-server-config-claim*/}}
+{{/*              mountPath: /opt/hive/conf*/}}
+{{/*          command:*/}}
+{{/*            - "/bin/sh"*/}}
+{{/*            - "-c"*/}}
+{{/*            - |*/}}
+{{/*              cd /tmp/configMap*/}}
+{{/*              cp -L init-hive-db.sh /opt/hive/conf/init-hive-db.sh*/}}
+{{/*              cp -L hivemetastore-site.xml /opt/hive/conf/hivemetastore-site.xml*/}}
+{{/*              cp -L hiveserver2-site.xml /opt/hive/conf/hiveserver2-site.xml*/}}
+{{/*              cp -L core-site.xml /opt/hive/conf/core-site.xml*/}}
+{{/*              cp -L hdfs-site.xml /opt/hive/conf/hdfs-site.xml*/}}
+{{/*              # chown -R 1000:1000 /opt/hive/*/}}
+{{/*              chmod +x /opt/hive/conf/init-hive-db.sh*/}}
+{{/*          securityContext:*/}}
+{{/*            runAsUser: 0*/}}
+      containers:
+        - image: rg.fr-par.scw.cloud/namespace-pipeline/hive-server:latest
+{{/*          command:*/}}
+{{/*            - "/bin/bash"*/}}
+{{/*            - "-c"*/}}
+{{/*            - |*/}}
+{{/*              mkdir -p /opt/hive/init/*/}}
+{{/*              mv /opt/hive/conf/init-hive-db.sh /opt/hive/init/init-hive-db.sh*/}}
+{{/*              /opt/hive/init/init-hive-db.sh*/}}
+          args:
+            - /opt/hive/init/init-hive-db.sh
+          env:
+            - name: HIVE_SERVER2_THRIFT_PORT
+              value: "10000"
+            - name: IS_RESUME
+              value: "true"
+            - name: SERVICE_NAME
+              value: hiveserver2
+            - name: SERVICE_OPTS
+              value: -Dhive.metastore.uris=thrift://hive-metastore:9083
+
+          name: hive-server
+          ports:
+            - containerPort: 10000
+              protocol: TCP
+            - containerPort: 10002
+              protocol: TCP
+          volumeMounts:
+            - name: warehouse
+              mountPath: /opt/hive/data/warehouse
+{{/*            - name: hive-server-config-claim*/}}
+{{/*              mountPath: /opt/hive/conf*/}}
+          securityContext:
+            runAsUser: 0
+      hostname: hive-server
+      restartPolicy: Always
+      volumes:
+        - name: warehouse
+          persistentVolumeClaim:
+            claimName: warehouse
+        - name: hive-init-server
+          configMap:
+            name: hive-metastore-cm0
+        - name: hive-server-config-claim
+          persistentVolumeClaim:
+            claimName: hive-server-config-claim

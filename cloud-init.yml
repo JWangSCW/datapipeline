@@ -1,0 +1,49 @@
+#cloud-config
+# SSH port change to 2201 instead of 22
+write_files:
+  - path: /etc/ssh/sshd_config
+    content: |
+      Port 2201
+package_update: true
+package_upgrade: true
+
+groups:
+  - docker
+
+system_info:
+  default_user:
+    groups: [ docker ]
+
+packages:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - gnupg
+  - lsb-release
+  - unattended-upgrades
+
+
+runcmd:
+  - useradd -s /bin/bash -m emaudet
+  - echo 'emaudet  ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/emaudet
+  - mkdir -p /opt/covid_line/
+  - git clone https://github.com/davide-andreoli/covid_line.git /opt/covid_line/
+  - cd /opt/covid_line/
+  - # DOCKER standard mode
+  - mkdir -p /etc/apt/keyrings
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+  - echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+  - apt-get update
+  - apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+  - systemctl enable docker
+  - systemctl start docker
+#  - docker compose --profile pipeline build
+#  - docker compose --profile pipeline up -d
+#  - chmod 777 -R /opt/covid_line/covid_data
+#  - docker compose --profile superset build
+#  - docker compose --profile superset up -d
+#  - docker compose --profile zeppelin build
+#  - chown -R 1000:1000 /opt/covid_line/covid_data/notebook
+#  - docker compose --profile zeppelin up -d
+
+final_message: "Cloud init is over after $UPTIME seconds"
