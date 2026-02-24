@@ -64,6 +64,7 @@ resource "scaleway_k8s_pool" "demo" {
   root_volume_size_in_gb = 32
 }
 
+
 provider "kubernetes" {
   host                   = scaleway_k8s_cluster.demo.kubeconfig[0].host
   token                  = scaleway_k8s_cluster.demo.kubeconfig[0].token
@@ -128,8 +129,14 @@ resource "helm_release" "airflow" {
   create_namespace = true
   version          = "1.18.0"
 
-  values = [file("${path.module}/values.yaml")]
-
+  values = [templatefile("${path.module}/values.yaml.tftpl", {
+    pg_username = var.pg_username
+    pg_password = var.pg_password
+    pg_host     = scaleway_rdb_instance.demo.load_balancer[0].ip
+    pg_port     = var.pg_port
+    pg_table    = var.pg_table
+    git_repo    = var.dbt_repo
+  })]
 
   set {
     name  = "dags.gitSync.enabled"
@@ -156,7 +163,6 @@ resource "helm_release" "airflow" {
     name  = "dags.persistence.enabled"
     value = "false"
   }
-
   set {
     name  = "envFromSecret"
     value = kubernetes_secret.dwh_connection.metadata[0].name
@@ -174,7 +180,7 @@ resource "kubernetes_secret" "dwh_connection" {
     namespace = "airflow"
   }
   data = {
-    "AIRFLOW_CONN_CLICKHOUSE_DEFAULT" = "clickhouse://${var.dwh_username}:${var.dwh_password}@${element(split("/", scaleway_datawarehouse_deployment.demo.id), 1)}.dtwh.${var.region}.scw.cloud:9440/${var.dwh_table}?secure=1"
+    "AIRFLOW_CONN_CLICKHOUSE_DEFAULT" = "clickhouse://${var.dwh_username}:${var.dwh_password}@${element(split("/", scaleway_datawarehouse_deployment.demo.id), 1)}.dtwh.${var.region}.scw.cloud:${var.dwh_port}/${var.dwh_table}?secure=1"
   }
   type = "Opaque"
 
@@ -188,7 +194,7 @@ resource "kubernetes_secret" "postgres_connection" {
   }
 
   data = {
-    "AIRFLOW_CONN_POSTGRES_SOURCE" = "postgresql://${var.pg_username}:${var.pg_password}@${scaleway_rdb_instance.demo.load_balancer[0].ip}:7116/${var.pg_table}"
+    "AIRFLOW_CONN_POSTGRES_SOURCE" = "postgresql://${var.pg_username}:${var.pg_password}@${scaleway_rdb_instance.demo.load_balancer[0].ip}:${var.pg_port}/${var.pg_table}"
   }
 
   type       = "Opaque"
@@ -201,12 +207,12 @@ resource "kubernetes_secret" "postgres_connection" {
 #     namespace = "airflow"
 #   }
 #   spec {
-#     access_modes = ["ReadWriteOnce"] # Kapsule Block Storage est RWO
+#     access_modes = ["ReadWriteOnce"]
 #     resources {
 #       requests = {
 #         storage = "5Gi"
 #       }
 #     }
-#     storage_class_name = "sbs-default" # Le standard chez Scaleway
+#     storage_class_name = "sbs-default"
 #   }
 # }

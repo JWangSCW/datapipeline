@@ -39,6 +39,11 @@ variable "pg_table" {
   description = "The name of the source database within PostgreSQL (e.g., pg-demo-1)."
 }
 
+variable "pg_port" {
+  type        = number
+  description = "The port of the source database PostgreSQL (e.g., 7116)."
+}
+
 # --- Managed ClickHouse (Destination / DWH) ---
 
 variable "dwh_username" {
@@ -55,6 +60,11 @@ variable "dwh_password" {
 variable "dwh_table" {
   type        = string
   description = "The name of the target database in ClickHouse (typically 'default')."
+}
+
+variable "dwh_port" {
+  type        = number
+  description = "The port of the ClickHouse instance (e.g., 9440)."
 }
 
 # --- Git & CI/CD ---
