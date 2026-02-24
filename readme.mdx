@@ -1,0 +1,61 @@
+---
+title: Building a data pipeline based on Airflow, through Scaleway Kapsule, PostgreSQL, and ClickHouse
+description: Learn how to build and orchestrate a data pipeline on Scaleway Kapsule to move data from a Managed PostgreSQL to ClickHouse using runtime dependency installation.
+tags: airflow kapsule postgresql clickhouse dlt dbt kubernetes
+products:
+  - Kapsule
+  - Managed-PostgreSQL
+  - ClickHouse
+dates:
+  validation: 2026-02-23
+  posted: 2026-02-23
+  validation_frequency: 12
+difficulty: intermediate
+usecase:
+  - data-engineering
+  - analytics
+ecosystem:
+  - Third-party
+---
+
+import Requirements from '@macros/iam/requirements.mdx'
+
+[Apache Airflow](https://airflow.apache.org/) is an open-source platform for developing, scheduling, and monitoring batch-oriented workflows. Combined with [Scaleway Kapsule](https://www.scaleway.com/en/kubernetes-kapsule/), it provides a scalable environment to run data pipelines without maintaining custom Docker images.
+
+This tutorial shows how to build an ETL (Extract, Load, Transform) pipeline. You use the **dlt (data load tool)** to extract data from a **Managed PostgreSQL** source and load it into a **Managed ClickHouse** database. Dependencies are installed dynamically at runtime using the `KubernetesPodOperator`.
+
+<Requirements />
+
+- A Scaleway account logged into the [console](https://console.scaleway.com)
+- [Owner](/iam/concepts/#owner) status or [IAM permissions](/iam/concepts/#permission) allowing you to perform actions
+- A [Scaleway Kapsule cluster](/kubernetes/how-to/create-cluster/) with Airflow installed
+- A [Managed PostgreSQL instance](/managed-databases-for-postgresql-and-mysql/quickstart/)
+- A [Managed ClickHouse instance](/managed-databases-for-clickhouse/quickstart/)
+- `kubectl` configured to point to your Kapsule cluster
+
+## Setting up secure connections
+
+Use Kubernetes Secrets to store connection strings. This method keeps credentials secure and separates configuration from the DAG code (Please consider also store the secrets through Scaleway Secrets Manager)
+
+
+## Executing and monitoring the pipeline
+
+1. Trigger the **1_seed_postgres_source** DAG in the Airflow UI.
+2. Monitor the execution logs with `kubectl` to confirm the SQL insertion:
+    ```bash
+    kubectl logs -f -n airflow -l dag_id=1_seed_postgres_source -c base
+    ```
+3. Trigger the **2_etl_postgres_to_clickhouse** DAG once the seeding is successful.
+4. Verify the data in your ClickHouse console. 
+    <Message type="note">
+      dlt uses a naming convention when loading into the `default` database. Your tables are prefixed with the dataset name and three underscores: `datasetname___tablename`.
+    </Message>
+
+    ```sql
+    SELECT * FROM default.raw_data___users;
+    ```
+
+## Going further
+
+- **Data Transformation**: Use **dbt-clickhouse** to transform your raw tables into clean analytics models.
+- **Performance**: Build a custom Docker image and push it to the [Scaleway Container Registry](/container-registry/quickstart/) to reduce pod startup time in production.

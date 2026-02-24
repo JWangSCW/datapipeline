@@ -1,0 +1,47 @@
+# values.yaml
+executor: "KubernetesExecutor"
+
+postgresql:
+  enabled: false
+redis:
+  enabled: false
+
+data:
+  metadataConnection:
+    user: "admin"                  # Remplacez par le vrai user
+    pass: "Xingyun2026!"          # Remplacez par le mot de passe généré
+    protocol: "postgresql"
+    host: "195.154.197.217"                     # <-- HARDCODED (IP publique ou privée)
+    port: 7116
+    db: "pg-demo-1"
+    sslmode: "require"
+
+webserver:
+  defaultUser:
+    enabled: true
+    role: Admin
+    username: admin
+    email: admin@example.com
+    firstName: admin
+    lastName: admin
+    password: admin
+
+ingress:
+  apiServer:
+    enabled: true
+    ingressClassName: "nginx"
+    hosts:
+      - name: "" # Laisse vide pour l'IP
+        path: "/"
+        pathType: ImplementationSpecific
+
+dags:
+  persistence:
+    enabled: false
+  gitSync:
+    enabled: true
+    repo: "https://github.com/JWangSCW/airflow-dags.git"
+    branch: "main"
+    rev: "HEAD"
+    depth: 1
+    wait: 30
