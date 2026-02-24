@@ -64,21 +64,6 @@ resource "scaleway_k8s_pool" "demo" {
   root_volume_size_in_gb = 32
 }
 
-
-provider "kubernetes" {
-  host                   = scaleway_k8s_cluster.demo.kubeconfig[0].host
-  token                  = scaleway_k8s_cluster.demo.kubeconfig[0].token
-  cluster_ca_certificate = base64decode(scaleway_k8s_cluster.demo.kubeconfig[0].cluster_ca_certificate)
-}
-
-provider "helm" {
-  kubernetes {
-    host                   = scaleway_k8s_cluster.demo.kubeconfig[0].host
-    token                  = scaleway_k8s_cluster.demo.kubeconfig[0].token
-    cluster_ca_certificate = base64decode(scaleway_k8s_cluster.demo.kubeconfig[0].cluster_ca_certificate)
-  }
-}
-
 resource "scaleway_rdb_instance" "demo" {
   name           = "pg-demo-1"
   node_type      = "db-dev-s"
@@ -109,6 +94,21 @@ resource "scaleway_datawarehouse_deployment" "demo" {
   cpu_max       = 4
   ram_per_cpu   = 4
   password      = var.dwh_password
+}
+
+
+provider "kubernetes" {
+  host                   = scaleway_k8s_cluster.demo.kubeconfig[0].host
+  token                  = scaleway_k8s_cluster.demo.kubeconfig[0].token
+  cluster_ca_certificate = base64decode(scaleway_k8s_cluster.demo.kubeconfig[0].cluster_ca_certificate)
+}
+
+provider "helm" {
+  kubernetes {
+    host                   = scaleway_k8s_cluster.demo.kubeconfig[0].host
+    token                  = scaleway_k8s_cluster.demo.kubeconfig[0].token
+    cluster_ca_certificate = base64decode(scaleway_k8s_cluster.demo.kubeconfig[0].cluster_ca_certificate)
+  }
 }
 
 resource "helm_release" "ingress_nginx" {
@@ -200,19 +200,3 @@ resource "kubernetes_secret" "postgres_connection" {
   type       = "Opaque"
   depends_on = [scaleway_rdb_database.demo]
 }
-
-# resource "kubernetes_persistent_volume_claim" "airflow_dags_pvc" {
-#   metadata {
-#     name      = "airflow-dags-pvc"
-#     namespace = "airflow"
-#   }
-#   spec {
-#     access_modes = ["ReadWriteOnce"]
-#     resources {
-#       requests = {
-#         storage = "5Gi"
-#       }
-#     }
-#     storage_class_name = "sbs-default"
-#   }
-# }
