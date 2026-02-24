@@ -1,44 +1,65 @@
+# --- Scaleway Authentication ---
+
 variable "access_key" {
-  default = "SCWXNVMDB4K8FT13Q4JJ"
+  type        = string
+  description = "Scaleway Access Key used for API authentication."
 }
 
 variable "secret_key" {
-  default = "c87f18df-2c0c-4d6c-aa31-141effce4948"
+  type        = string
+  description = "Scaleway Secret Key. This value is marked as sensitive and will be masked in console logs."
+  sensitive   = true #
 }
 
 variable "project_id" {
-  default = "8cfcea18-2aa9-4eb4-8754-4e32a034abec"
+  type        = string
+  description = "The ID of the Scaleway project where resources are deployed."
 }
 
 variable "region" {
-  default = "fr-par"
+  type        = string
+  description = "The Scaleway region used (e.g., fr-par)."
 }
 
+# --- Managed PostgreSQL (Source) ---
+
 variable "pg_username" {
-  default = "admin"
+  type        = string
+  description = "Administrative username for the PostgreSQL database instance."
 }
 
 variable "pg_password" {
-  default = "Xingyun2026!"
+  type        = string
+  description = "Password for the PostgreSQL database. Masked in output for security."
+  sensitive   = true #
 }
 
+variable "pg_table" {
+  type        = string
+  description = "The name of the source database within PostgreSQL (e.g., pg-demo-1)."
+}
+
+# --- Managed ClickHouse (Destination / DWH) ---
+
 variable "dwh_username" {
-  default = "scwadmin"
+  type        = string
+  description = "Administrative username for the ClickHouse instance."
 }
 
 variable "dwh_password" {
-  default = "Xingyun2026%21"
+  type        = string
+  description = "ClickHouse password. Note: Special characters must be URL-encoded for the connection string to be valid (e.g., ! becomes %21)."
+  sensitive   = true #
 }
 
 variable "dwh_table" {
-  default = "default"
-}
-variable "pg_table" {
-  default = "pg-demo-1"
+  type        = string
+  description = "The name of the target database in ClickHouse (typically 'default')."
 }
 
+# --- Git & CI/CD ---
 
 variable "dbt_repo" {
-  default = "https://github.com/JWangSCW/airflow-dags.git"
+  type        = string
+  description = "The URL of the Git repository containing Airflow DAGs and dbt models."
 }
-
